@@ -3,12 +3,13 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 /*
-  Author: Daniel Kopta and ...
+  Author: Daniel Kopta, Cameron Davis and Chase Canning
   Chess browser backend 
 */
 
@@ -32,11 +33,20 @@ namespace ChessBrowser
       // TODO:
       //       Load and parse the PGN file
       //       We recommend creating separate libraries to represent chess data and load the file
+      List<ChessGame> games = PGNReader.GetGames(PGNfilename);
+
+      Debug.WriteLine(games.Count);
+      if (games.Count > 0)
+      {
+        Debug.WriteLine(games[0].Event);
+      }
+      
 
       // TODO:
       //       Use this to tell the GUI's progress bar how many total work steps there are
       //       For example, one iteration of your main upload loop could be one work step
       //mainPage.SetNumWorkItems( ... );
+      mainPage.SetNumWorkItems(games.Count);
 
 
       using ( MySqlConnection conn = new MySqlConnection( connection ) )
@@ -44,7 +54,7 @@ namespace ChessBrowser
         try
         {
           // Open a connection
-          conn.Open();
+          //conn.Open();
 
           // TODO:
           //       iterate through your data and generate appropriate insert commands
