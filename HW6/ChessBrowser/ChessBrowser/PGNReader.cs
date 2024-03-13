@@ -27,7 +27,14 @@ namespace ChessBrowser
             string data = line.Split('"', '"')[1];
             if (line.Contains("EventDate"))
             {
-              currentGame.EventDate = data;
+              if(data.Contains("?"))
+              {
+                currentGame.EventDate = DateTime.Parse("00-00-0000");
+              } 
+              else
+              {
+                currentGame.EventDate = DateTime.Parse(data);
+              }
             }
             else if (line.Contains("Event"))
             {
@@ -43,11 +50,11 @@ namespace ChessBrowser
             }
             else if (line.Contains("WhiteElo"))
             {
-              currentGame.WhiteElo = data;
+              currentGame.WhiteElo = uint.Parse(data);
             }
             else if (line.Contains("BlackElo"))
             {
-              currentGame.BlackElo = data;
+              currentGame.BlackElo = uint.Parse(data);
             }
             else if (line.Contains("White"))
             {

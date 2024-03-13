@@ -59,9 +59,69 @@ namespace ChessBrowser
           // TODO:
           //       iterate through your data and generate appropriate insert commands
 
-          // TODO:
-          //       Use this inside a loop to tell the GUI that one work step has completed:
-          await mainPage.NotifyWorkItemCompleted();
+          // batch queries together?
+
+          MySqlCommand eventsCmd = conn.CreateCommand();
+          eventsCmd.CommandText = "INSERT INTO Events VALUES (@Name, @Site, @Date);";
+          eventsCmd.Parameters.Add("@Name");
+          eventsCmd.Parameters.Add("@Site");
+          eventsCmd.Parameters.Add("@Date");
+
+          MySqlCommand whiteplayerCmd = conn.CreateCommand();
+          // Do we want INSERT IGNORE INTO?
+          whiteplayerCmd.CommandText = "INSERT INTO Players VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = @WhiteElo WHERE @WhiteElo > Elo;";
+          whiteplayerCmd.Parameters.Add("@WhiteName");
+          whiteplayerCmd.Parameters.Add("@WhiteElo");
+
+          MySqlCommand blackplayerCmd = conn.CreateCommand();
+          // Do we want INSERT IGNORE INTO?
+          blackplayerCmd.CommandText = "INSERT INTO Players VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = @BlackElo WHERE @BlackElo > Elo;";
+          blackplayerCmd.Parameters.Add("@BlackName");
+          blackplayerCmd.Parameters.Add("@BlackElo");
+
+          MySqlCommand gamesCmd = conn.CreateCommand();
+          gamesCmd.CommandText = "INSERT INTO Games VALUES(@Round, @Result, @Moves, @WhitePID, @BlackPID, @EventID);";
+          gamesCmd.Parameters.Add("@Round");
+          gamesCmd.Parameters.Add("@Result");
+          gamesCmd.Parameters.Add("@Moves");
+          gamesCmd.Parameters.Add("@WhitePID");
+          gamesCmd.Parameters.Add("@BlackPID");
+          gamesCmd.Parameters.Add("@EventID");
+
+          uint eventID;
+          uint whitePID;
+          uint blackPID;
+
+          for (int i = 0; i < games.Count; i++)
+          {
+            eventsCmd.Parameters["@Name"].Value = games[i].Event;
+            eventsCmd.Parameters["@Site"].Value = games[i].Site;
+            eventsCmd.Parameters["@Date"].Value = games[i].EventDate;
+
+            eventsCmd.ExecuteNonQuery();
+
+
+            whiteplayerCmd.Parameters["@WhiteName"].Value = games[i].White;
+            whiteplayerCmd.Parameters["@WhiteElo"].Value = games[i].WhiteElo;
+
+            blackplayerCmd.Parameters["@BlackName"].Value = games[i].Black;
+            blackplayerCmd.Parameters["@BlackElo"].Value = games[i].BlackElo;
+
+            gamesCmd.Parameters["@Round"].Value = games[i].Round;
+            gamesCmd.Parameters["@Result"].Value = games[i].Result;
+            gamesCmd.Parameters["@Moves"].Value = games[i].Moves;
+            //gamesCmd.Parameters["@WhitePID"].Value = whitePID;
+            //gamesCmd.Parameters["@BlackPID"].Value = blackPID;
+            //gamesCmd.Parameters["@EventID"].Value = eventID;
+
+
+            whiteplayerCmd.ExecuteNonQuery();
+            blackplayerCmd.ExecuteNonQuery();
+            gamesCmd.ExecuteNonQuery();
+
+            // Tell the GUI that one work step has completed
+            await mainPage.NotifyWorkItemCompleted();
+          }         
 
         }
         catch ( Exception e )
