@@ -67,30 +67,26 @@ namespace ChessBrowser
           eventsCmd.Parameters.Add("@Site");
           eventsCmd.Parameters.Add("@Date");
 
-          MySqlCommand whiteplayerCmd = conn.CreateCommand();
+          MySqlCommand playersCmd = conn.CreateCommand();
           // Do we want INSERT IGNORE INTO?
-          whiteplayerCmd.CommandText = "INSERT INTO Players VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = @WhiteElo WHERE @WhiteElo > Elo;";
-          whiteplayerCmd.Parameters.Add("@WhiteName");
-          whiteplayerCmd.Parameters.Add("@WhiteElo");
-
-          MySqlCommand blackplayerCmd = conn.CreateCommand();
-          // Do we want INSERT IGNORE INTO?
-          blackplayerCmd.CommandText = "INSERT INTO Players VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = @BlackElo WHERE @BlackElo > Elo;";
-          blackplayerCmd.Parameters.Add("@BlackName");
-          blackplayerCmd.Parameters.Add("@BlackElo");
+          playersCmd.CommandText = "INSERT INTO Players VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @WhiteElo, @WhiteElo, Elo);" +
+                                   "INSERT INTO Players VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @BlackElo, @BlackElo, Elo);";
+          playersCmd.Parameters.Add("@WhiteName");
+          playersCmd.Parameters.Add("@WhiteElo");
+          playersCmd.Parameters.Add("@BlackName");
+          playersCmd.Parameters.Add("@BlackElo");
 
           MySqlCommand gamesCmd = conn.CreateCommand();
-          gamesCmd.CommandText = "INSERT INTO Games VALUES(@Round, @Result, @Moves, @WhitePID, @BlackPID, @EventID);";
+          gamesCmd.CommandText = "INSERT INTO Games VALUES(@Round, @Result, @Moves, " +
+                                 "(SELECT pID FROM Players WHERE Name = @WhiteName), " +
+                                 "(SELECT pID FROM Players WHERE Name = @BlackName), " +
+                                 "(SELECT pID FROM Players WHERE Name = @EventName));";
           gamesCmd.Parameters.Add("@Round");
           gamesCmd.Parameters.Add("@Result");
           gamesCmd.Parameters.Add("@Moves");
-          gamesCmd.Parameters.Add("@WhitePID");
-          gamesCmd.Parameters.Add("@BlackPID");
-          gamesCmd.Parameters.Add("@EventID");
-
-          uint eventID;
-          uint whitePID;
-          uint blackPID;
+          gamesCmd.Parameters.Add("@WhiteName");
+          gamesCmd.Parameters.Add("@BlackName");
+          gamesCmd.Parameters.Add("@EventName");
 
           for (int i = 0; i < games.Count; i++)
           {
@@ -100,23 +96,20 @@ namespace ChessBrowser
 
             eventsCmd.ExecuteNonQuery();
 
+            playersCmd.Parameters["@WhiteName"].Value = games[i].White;
+            playersCmd.Parameters["@WhiteElo"].Value = games[i].WhiteElo;
+            playersCmd.Parameters["@BlackName"].Value = games[i].Black;
+            playersCmd.Parameters["@BlackElo"].Value = games[i].BlackElo;
 
-            whiteplayerCmd.Parameters["@WhiteName"].Value = games[i].White;
-            whiteplayerCmd.Parameters["@WhiteElo"].Value = games[i].WhiteElo;
-
-            blackplayerCmd.Parameters["@BlackName"].Value = games[i].Black;
-            blackplayerCmd.Parameters["@BlackElo"].Value = games[i].BlackElo;
+            playersCmd.ExecuteNonQuery();
 
             gamesCmd.Parameters["@Round"].Value = games[i].Round;
             gamesCmd.Parameters["@Result"].Value = games[i].Result;
             gamesCmd.Parameters["@Moves"].Value = games[i].Moves;
-            //gamesCmd.Parameters["@WhitePID"].Value = whitePID;
-            //gamesCmd.Parameters["@BlackPID"].Value = blackPID;
-            //gamesCmd.Parameters["@EventID"].Value = eventID;
-
-
-            whiteplayerCmd.ExecuteNonQuery();
-            blackplayerCmd.ExecuteNonQuery();
+            gamesCmd.Parameters["@WhiteName"].Value = games[i].White;
+            gamesCmd.Parameters["@BlackName"].Value = games[i].Black;
+            gamesCmd.Parameters["@EventName"].Value = games[i].Event;
+            
             gamesCmd.ExecuteNonQuery();
 
             // Tell the GUI that one work step has completed
