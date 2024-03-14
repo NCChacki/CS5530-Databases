@@ -162,10 +162,10 @@ namespace ChessBrowser
           //       then parse the results into an appropriate string and return it.
 
           MySqlCommand searchCommand = conn.CreateCommand();
-          searchCommand.CommandText = "SELECT g.Result, e.Name as eName, e.Site, wp.Name as wpName, wp.Elo as wpElo, bp.Name as bpName, bp.Elo as bpElo ";
+          searchCommand.CommandText = "SELECT g.Result, e.Name as eName, e.Date, e.Site, wp.Name as wpName, wp.Elo as wpElo, bp.Name as bpName, bp.Elo as bpElo ";
           if (showMoves)
           {
-            searchCommand.CommandText += "g.Moves ";
+            searchCommand.CommandText += ",g.Moves ";
           }
           searchCommand.CommandText += "FROM Games g JOIN Events e JOIN Players wp JOIN Players bp ";
           searchCommand.CommandText += "WHERE g.eID = e.eID AND g.WhitePlayer = wp.pID AND g.BlackPlayer = bp.pID ";
@@ -202,7 +202,7 @@ namespace ChessBrowser
           {
             while ( reader.Read() )
             {
-
+              numRows++;
               parsedResult += "\nEvent: " + reader["eName"];
               parsedResult += "\nSite: " + reader["Site"];
               parsedResult += "\nDate: " + reader["Date"];
@@ -213,6 +213,7 @@ namespace ChessBrowser
               {
                 parsedResult += "\nMoves: " + reader["Moves"];
               }
+              parsedResult += "\n";
             }
           }
 
