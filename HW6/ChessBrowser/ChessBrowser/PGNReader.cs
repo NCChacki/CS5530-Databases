@@ -29,11 +29,11 @@ namespace ChessBrowser
             {
               if(data.Contains("?"))
               {
-                currentGame.EventDate = DateTime.Parse("00-00-0000");
+                currentGame.EventDate = "0000-00-00";
               } 
               else
               {
-                currentGame.EventDate = DateTime.Parse(data);
+                currentGame.EventDate = data;
               }
             }
             else if (line.Contains("Event"))

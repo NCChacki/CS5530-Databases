@@ -25,7 +25,7 @@ namespace ChessBrowser
     // The result of the game
     public string Result { get; set; }
     // The event date
-    public DateTime EventDate { get; set; }
+    public string EventDate { get; set; }
     // The text representing the moves
     public string Moves { get; set; }
   }

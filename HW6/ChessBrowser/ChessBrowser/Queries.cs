@@ -30,9 +30,8 @@ namespace ChessBrowser
       // assuimg you've typed a user and password in the GUI
       string connection = mainPage.GetConnectionString();
 
-      // TODO:
-      //       Load and parse the PGN file
-      //       We recommend creating separate libraries to represent chess data and load the file
+      // Load and parse the PGN file
+      // We recommend creating separate libraries to represent chess data and load the file
       List<ChessGame> games = PGNReader.GetGames(PGNfilename);
 
       Debug.WriteLine(games.Count);
@@ -42,10 +41,8 @@ namespace ChessBrowser
       }
       
 
-      // TODO:
-      //       Use this to tell the GUI's progress bar how many total work steps there are
-      //       For example, one iteration of your main upload loop could be one work step
-      //mainPage.SetNumWorkItems( ... );
+      // Tell the GUI's progress bar how many total work steps there are
+      // For example, one iteration of your main upload loop could be one work step
       mainPage.SetNumWorkItems(games.Count);
 
 
@@ -54,23 +51,20 @@ namespace ChessBrowser
         try
         {
           // Open a connection
-          //conn.Open();
+          conn.Open();
 
-          // TODO:
-          //       iterate through your data and generate appropriate insert commands
-
-          // batch queries together?
+          // Generate appropriate insert commands with prepared statements
 
           MySqlCommand eventsCmd = conn.CreateCommand();
-          eventsCmd.CommandText = "INSERT INTO Events VALUES (@Name, @Site, @Date);";
+          eventsCmd.CommandText = "INSERT INTO Events (Name, Site, Date) VALUES (@Name, @Site, @Date);";
           eventsCmd.Parameters.Add("@Name");
           eventsCmd.Parameters.Add("@Site");
           eventsCmd.Parameters.Add("@Date");
 
           MySqlCommand playersCmd = conn.CreateCommand();
           // Do we want INSERT IGNORE INTO?
-          playersCmd.CommandText = "INSERT INTO Players VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @WhiteElo, @WhiteElo, Elo);" +
-                                   "INSERT INTO Players VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @BlackElo, @BlackElo, Elo);";
+          playersCmd.CommandText = "INSERT INTO Players (Name, Elo) VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @WhiteElo, @WhiteElo, Elo);" +
+                                   "INSERT INTO Players (Name, Elo) VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @BlackElo, @BlackElo, Elo);";
           playersCmd.Parameters.Add("@WhiteName");
           playersCmd.Parameters.Add("@WhiteElo");
           playersCmd.Parameters.Add("@BlackName");
@@ -80,7 +74,7 @@ namespace ChessBrowser
           gamesCmd.CommandText = "INSERT INTO Games VALUES(@Round, @Result, @Moves, " +
                                  "(SELECT pID FROM Players WHERE Name = @WhiteName), " +
                                  "(SELECT pID FROM Players WHERE Name = @BlackName), " +
-                                 "(SELECT pID FROM Players WHERE Name = @EventName));";
+                                 "(SELECT eID FROM Events WHERE Name = @EventName));";
           gamesCmd.Parameters.Add("@Round");
           gamesCmd.Parameters.Add("@Result");
           gamesCmd.Parameters.Add("@Moves");
@@ -88,6 +82,7 @@ namespace ChessBrowser
           gamesCmd.Parameters.Add("@BlackName");
           gamesCmd.Parameters.Add("@EventName");
 
+          // Iterate through all of the games and insert them to the database
           for (int i = 0; i < games.Count; i++)
           {
             eventsCmd.Parameters["@Name"].Value = games[i].Event;
