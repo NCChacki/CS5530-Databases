@@ -56,31 +56,32 @@ namespace ChessBrowser
           // Generate appropriate insert commands with prepared statements
 
           MySqlCommand eventsCmd = conn.CreateCommand();
-          eventsCmd.CommandText = "INSERT INTO Events (Name, Site, Date) VALUES (@Name, @Site, @Date);";
-          eventsCmd.Parameters.Add("@Name");
-          eventsCmd.Parameters.Add("@Site");
-          eventsCmd.Parameters.Add("@Date");
+          eventsCmd.CommandText = "INSERT IGNORE INTO Events (Name, Site, Date) VALUES (@Name, @Site, @Date);";
+          eventsCmd.Parameters.AddWithValue("@Name", "");
+          eventsCmd.Parameters.AddWithValue("@Site", "");
+          eventsCmd.Parameters.AddWithValue("@Date", "");
+
 
           MySqlCommand playersCmd = conn.CreateCommand();
           // Do we want INSERT IGNORE INTO?
           playersCmd.CommandText = "INSERT INTO Players (Name, Elo) VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @WhiteElo, @WhiteElo, Elo);" +
                                    "INSERT INTO Players (Name, Elo) VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @BlackElo, @BlackElo, Elo);";
-          playersCmd.Parameters.Add("@WhiteName");
-          playersCmd.Parameters.Add("@WhiteElo");
-          playersCmd.Parameters.Add("@BlackName");
-          playersCmd.Parameters.Add("@BlackElo");
+          playersCmd.Parameters.AddWithValue("@WhiteName", "");
+          playersCmd.Parameters.AddWithValue("@WhiteElo", "");
+          playersCmd.Parameters.AddWithValue("@BlackName", "");
+          playersCmd.Parameters.AddWithValue("@BlackElo", "");
 
           MySqlCommand gamesCmd = conn.CreateCommand();
-          gamesCmd.CommandText = "INSERT INTO Games VALUES(@Round, @Result, @Moves, " +
+          gamesCmd.CommandText = "INSERT IGNORE INTO Games VALUES(@Round, @Result, @Moves, " +
                                  "(SELECT pID FROM Players WHERE Name = @WhiteName), " +
                                  "(SELECT pID FROM Players WHERE Name = @BlackName), " +
                                  "(SELECT eID FROM Events WHERE Name = @EventName));";
-          gamesCmd.Parameters.Add("@Round");
-          gamesCmd.Parameters.Add("@Result");
-          gamesCmd.Parameters.Add("@Moves");
-          gamesCmd.Parameters.Add("@WhiteName");
-          gamesCmd.Parameters.Add("@BlackName");
-          gamesCmd.Parameters.Add("@EventName");
+          gamesCmd.Parameters.AddWithValue("@Round", "");
+          gamesCmd.Parameters.AddWithValue("@Result", "");
+          gamesCmd.Parameters.AddWithValue("@Moves", "");
+          gamesCmd.Parameters.AddWithValue("@WhiteName", "");
+          gamesCmd.Parameters.AddWithValue("@BlackName", "");
+          gamesCmd.Parameters.AddWithValue("@EventName", "");
 
           // Iterate through all of the games and insert them to the database
           for (int i = 0; i < games.Count; i++)
@@ -159,6 +160,19 @@ namespace ChessBrowser
           // TODO:
           //       Generate and execute an SQL command,
           //       then parse the results into an appropriate string and return it.
+
+          MySqlCommand searchCommand = conn.CreateCommand();
+          searchCommand.CommandText = "";
+
+          using ( MySqlDataReader reader = searchCommand.ExecuteReader())
+          {
+            while ( reader.Read() )
+            {
+
+            }
+          }
+
+
         }
         catch ( Exception e )
         {
