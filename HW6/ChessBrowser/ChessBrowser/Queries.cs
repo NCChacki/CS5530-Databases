@@ -162,13 +162,57 @@ namespace ChessBrowser
           //       then parse the results into an appropriate string and return it.
 
           MySqlCommand searchCommand = conn.CreateCommand();
-          searchCommand.CommandText = "";
+          searchCommand.CommandText = "SELECT g.Result, e.Name as eName, e.Site, wp.Name as wpName, wp.Elo as wpElo, bp.Name as bpName, bp.Elo as bpElo ";
+          if (showMoves)
+          {
+            searchCommand.CommandText += "g.Moves ";
+          }
+          searchCommand.CommandText += "FROM Games g JOIN Events e JOIN Players wp JOIN Players bp ";
+          searchCommand.CommandText += "WHERE g.eID = e.eID AND g.WhitePlayer = wp.pID AND g.BlackPlayer = bp.pID ";
+          if (white != null)
+          {
+            searchCommand.CommandText += "AND wp.Name = @WPName ";
+            searchCommand.Parameters.AddWithValue("@WPName", white);
+          }
+          if (black != null)
+          {
+            searchCommand.CommandText += "AND bp.Name = @BPName ";
+            searchCommand.Parameters.AddWithValue("@BPName", black);
+          }
+          if (opening != null)
+          {
+            searchCommand.CommandText += "AND g.Moves LIKE \"@OpeningMove%\" ";
+            searchCommand.Parameters.AddWithValue("@OpeningMove", opening);
+          }
+          if (winner != null)
+          {
+            searchCommand.CommandText += "AND g.Result LIKE \"@Winner\" ";
+            searchCommand.Parameters.AddWithValue("@Winner", winner);
+          }
+          if (useDate)
+          {
+            searchCommand.CommandText += "AND e.Date BETWEEN @StartDate AND @EndDate ";
+            searchCommand.Parameters.AddWithValue("@StartDate", start);
+            searchCommand.Parameters.AddWithValue("@EndDate", end);
+          }
+          searchCommand.CommandText += ";";
+
 
           using ( MySqlDataReader reader = searchCommand.ExecuteReader())
           {
             while ( reader.Read() )
             {
 
+              parsedResult += "\nEvent: " + reader["eName"];
+              parsedResult += "\nSite: " + reader["Site"];
+              parsedResult += "\nDate: " + reader["Date"];
+              parsedResult += "\nWhite: " + reader["wpName"] + " (" + reader["wpElo"] + ")";
+              parsedResult += "\nBlack: " + reader["bpName"] + " (" + reader["bpElo"] + ")";
+              parsedResult += "\nResult: " + reader["Result"];
+              if (showMoves)
+              {
+                parsedResult += "\nMoves: " + reader["Moves"];
+              }
             }
           }
 
