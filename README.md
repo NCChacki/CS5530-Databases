@@ -1,8 +1,8 @@
 # CS5530
-Code from projects in CS5530 Databases at the University of Utah
+Code from projects in CS5530 Databases at the University of Utah  
 
-Instructor: Professor Daniel Kopta
-Contributors: Cameron Davis and Chase Canning
+Instructor: Professor Daniel Kopta  
+Contributors: Cameron Davis and Chase Canning  
 
 ### HW6 - Chess Browser
 
