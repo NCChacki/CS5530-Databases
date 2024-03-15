@@ -25,7 +25,7 @@ namespace ChessBrowser
           if (line.StartsWith('['))
           {
             string data = line.Split('"', '"')[1];
-            if (line.Contains("EventDate"))
+            if (line.StartsWith("[EventDate"))
             {
               if(data.Contains("?"))
               {
@@ -36,35 +36,35 @@ namespace ChessBrowser
                 currentGame.EventDate = data;
               }
             }
-            else if (line.Contains("Event"))
+            else if (line.StartsWith("[Event"))
             {
               currentGame.Event = data;
             }
-            else if (line.Contains("Site"))
+            else if (line.StartsWith("[Site"))
             {
               currentGame.Site = data;
             }
-            else if (line.Contains("Round"))
+            else if (line.StartsWith("[Round"))
             {
               currentGame.Round = data;
             }
-            else if (line.Contains("WhiteElo"))
+            else if (line.StartsWith("[WhiteElo"))
             {
               currentGame.WhiteElo = uint.Parse(data);
             }
-            else if (line.Contains("BlackElo"))
+            else if (line.StartsWith("[BlackElo"))
             {
               currentGame.BlackElo = uint.Parse(data);
             }
-            else if (line.Contains("White"))
+            else if (line.StartsWith("[White"))
             {
               currentGame.White = data;
             }
-            else if (line.Contains("Black"))
+            else if (line.StartsWith("[Black"))
             {
               currentGame.Black = data;
             }
-            else if (line.Contains("Result"))
+            else if (line.StartsWith("[Result"))
             {
               if (data.Equals("1-0"))
               {

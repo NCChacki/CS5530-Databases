@@ -32,14 +32,7 @@ namespace ChessBrowser
 
       // Load and parse the PGN file
       // We recommend creating separate libraries to represent chess data and load the file
-      List<ChessGame> games = PGNReader.GetGames(PGNfilename);
-
-      Debug.WriteLine(games.Count);
-      if (games.Count > 0)
-      {
-        Debug.WriteLine(games[0].Event);
-      }
-      
+      List<ChessGame> games = PGNReader.GetGames(PGNfilename);      
 
       // Tell the GUI's progress bar how many total work steps there are
       // For example, one iteration of your main upload loop could be one work step
@@ -63,7 +56,6 @@ namespace ChessBrowser
 
 
           MySqlCommand playersCmd = conn.CreateCommand();
-          // Do we want INSERT IGNORE INTO?
           playersCmd.CommandText = "INSERT INTO Players (Name, Elo) VALUES (@WhiteName, @WhiteElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @WhiteElo, @WhiteElo, Elo);" +
                                    "INSERT INTO Players (Name, Elo) VALUES (@BlackName, @BlackElo) ON DUPLICATE KEY UPDATE Elo = IF(Elo < @BlackElo, @BlackElo, Elo);";
           playersCmd.Parameters.AddWithValue("@WhiteName", "");
@@ -73,14 +65,14 @@ namespace ChessBrowser
 
           MySqlCommand gamesCmd = conn.CreateCommand();
           gamesCmd.CommandText = "INSERT IGNORE INTO Games VALUES(@Round, @Result, @Moves, " +
-                                 "(SELECT pID FROM Players WHERE Name = @WhiteName), " +
                                  "(SELECT pID FROM Players WHERE Name = @BlackName), " +
+                                 "(SELECT pID FROM Players WHERE Name = @WhiteName), " +
                                  "(SELECT eID FROM Events WHERE Name = @EventName));";
           gamesCmd.Parameters.AddWithValue("@Round", "");
           gamesCmd.Parameters.AddWithValue("@Result", "");
           gamesCmd.Parameters.AddWithValue("@Moves", "");
-          gamesCmd.Parameters.AddWithValue("@WhiteName", "");
           gamesCmd.Parameters.AddWithValue("@BlackName", "");
+          gamesCmd.Parameters.AddWithValue("@WhiteName", "");
           gamesCmd.Parameters.AddWithValue("@EventName", "");
 
           // Iterate through all of the games and insert them to the database
@@ -102,8 +94,8 @@ namespace ChessBrowser
             gamesCmd.Parameters["@Round"].Value = games[i].Round;
             gamesCmd.Parameters["@Result"].Value = games[i].Result;
             gamesCmd.Parameters["@Moves"].Value = games[i].Moves;
-            gamesCmd.Parameters["@WhiteName"].Value = games[i].White;
             gamesCmd.Parameters["@BlackName"].Value = games[i].Black;
+            gamesCmd.Parameters["@WhiteName"].Value = games[i].White;
             gamesCmd.Parameters["@EventName"].Value = games[i].Event;
             
             gamesCmd.ExecuteNonQuery();
@@ -167,8 +159,8 @@ namespace ChessBrowser
           {
             searchCommand.CommandText += ",g.Moves ";
           }
-          searchCommand.CommandText += "FROM Games g JOIN Events e JOIN Players wp JOIN Players bp ";
-          searchCommand.CommandText += "WHERE g.eID = e.eID AND g.WhitePlayer = wp.pID AND g.BlackPlayer = bp.pID ";
+          searchCommand.CommandText += "FROM Games g JOIN Events e JOIN Players wp ON g.WhitePlayer = wp.pID " +
+                                       "JOIN Players bp ON g.BlackPlayer = bp.pID WHERE g.eID = e.eID ";
           if (white != null)
           {
             searchCommand.CommandText += "AND wp.Name = @WPName ";
