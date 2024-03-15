@@ -173,12 +173,12 @@ namespace ChessBrowser
           }
           if (opening != null)
           {
-            searchCommand.CommandText += "AND g.Moves LIKE \"@OpeningMove%\" ";
-            searchCommand.Parameters.AddWithValue("@OpeningMove", opening);
+            searchCommand.CommandText += "AND g.Moves LIKE @OpeningMove ";
+            searchCommand.Parameters.AddWithValue("@OpeningMove", opening + '%');
           }
           if (winner != null)
           {
-            searchCommand.CommandText += "AND g.Result LIKE \"@Winner\" ";
+            searchCommand.CommandText += "AND g.Result LIKE @Winner ";
             searchCommand.Parameters.AddWithValue("@Winner", winner);
           }
           if (useDate)
