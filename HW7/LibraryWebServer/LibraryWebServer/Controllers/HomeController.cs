@@ -90,6 +90,7 @@ namespace LibraryWebServer.Controllers
     {
       using (Team88LibraryContext db = new Team88LibraryContext())
       {
+        // SELECT ... FROM Titles JOIN Inventory JOIN CheckedOut JOIN Patrons ...
         var query = from t in db.Titles
                     join i in db.Inventory
                     on t.Isbn equals i.Isbn into temp
@@ -125,6 +126,7 @@ namespace LibraryWebServer.Controllers
     {
       using (Team88LibraryContext db = new Team88LibraryContext())
       {
+        // SELECT ... FROM Titles JOIN Inventory JOIN CheckedOut JOIN Patrons as p WHERE p.CardNum = card
         var query = from t in db.Titles
                     join i in db.Inventory
                     on t.Isbn equals i.Isbn into temp
@@ -159,10 +161,26 @@ namespace LibraryWebServer.Controllers
     [HttpPost]
     public ActionResult CheckOutBook( int serial )
     {
-        // You may have to cast serial to a (uint)
+      // You may have to cast serial to a (uint)
 
+      using (Team88LibraryContext db = new Team88LibraryContext())
+      {
+        CheckedOut c = new CheckedOut();
+        c.CardNum = (uint) card;
+        c.Serial  = (uint) serial;
 
-        return Json( new { success = true } );
+        db.CheckedOut.Add(c);
+
+        try
+        {
+          db.SaveChanges();
+          return Json(new { success = true });
+        }
+        catch
+        {
+          return Json(new { success = false });
+        }
+      }
     }
 
     /// <summary>
@@ -175,9 +193,27 @@ namespace LibraryWebServer.Controllers
     [HttpPost]
     public ActionResult ReturnBook( int serial )
     {
-        // You may have to cast serial to a (uint)
+      // You may have to cast serial to a (uint)
 
-        return Json( new { success = true } );
+      using (Team88LibraryContext db = new Team88LibraryContext())
+      {
+        // SELECT * FROM CheckedOut WHERE Serial = serial
+        var query = from c in db.CheckedOut
+                    where c.Serial == serial
+                    select c;
+
+        db.CheckedOut.RemoveRange(query);
+
+        try
+        {
+          db.SaveChanges();
+          return Json(new { success = true });
+        }
+        catch
+        {
+          return Json(new { success = false });
+        }
+      }
     }
 
 
