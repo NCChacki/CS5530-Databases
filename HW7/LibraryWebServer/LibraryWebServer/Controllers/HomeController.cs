@@ -70,9 +70,9 @@ namespace LibraryWebServer.Controllers
     [HttpPost]
     public ActionResult LogOut()
     {
-        user = "";
-        card = -1;
-        return Json( new { success = true } );
+      user = "";
+      card = -1;
+      return Json( new { success = true } );
     }
 
     /// <summary>
@@ -88,11 +88,28 @@ namespace LibraryWebServer.Controllers
     [HttpPost]
     public ActionResult AllTitles()
     {
+      using (Team88LibraryContext db = new Team88LibraryContext())
+      {
+        var query = from t in db.Titles
+                    join i in db.Inventory
+                    on t.Isbn equals i.Isbn into temp
+                    from j in temp.DefaultIfEmpty()
+                    join c in db.CheckedOut
+                    on j.Serial equals c.Serial into temp2
+                    from j2 in temp2.DefaultIfEmpty()
+                    join p in db.Patrons
+                    on j2.CardNum equals p.CardNum into temp3
+                    from j3 in temp3.DefaultIfEmpty()
+                    select new {
+                      isbn = t.Isbn,
+                      title = t.Title,
+                      author = t.Author,
+                      serial = j == null ? null : (uint?) j.Serial,
+                      name = j3 == null ? "" : j3.Name
+                    };
 
-        // TODO: Implement
-
-        return Json( null );
-
+        return Json( query.ToArray() );
+      }
     }
 
     /// <summary>
