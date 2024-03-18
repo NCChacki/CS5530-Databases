@@ -123,8 +123,28 @@ namespace LibraryWebServer.Controllers
     [HttpPost]
     public ActionResult ListMyBooks()
     {
-        // TODO: Implement
-        return Json( null );
+      using (Team88LibraryContext db = new Team88LibraryContext())
+      {
+        var query = from t in db.Titles
+                    join i in db.Inventory
+                    on t.Isbn equals i.Isbn into temp
+                    from j in temp.DefaultIfEmpty()
+                    join c in db.CheckedOut
+                    on j.Serial equals c.Serial into temp2
+                    from j2 in temp2.DefaultIfEmpty()
+                    join p in db.Patrons
+                    on j2.CardNum equals p.CardNum into temp3
+                    from j3 in temp3.DefaultIfEmpty()
+                    where j3.CardNum == card
+                    select new
+                    {
+                      title = t.Title,
+                      author = t.Author,
+                      serial = j.Serial
+                    };
+
+        return Json(query.ToArray()); 
+      }
     }
 
 
