@@ -30,6 +30,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetDepartments()
         {            
+            // TODO: GetDepartments
             return Json(null);
         }
 
@@ -48,6 +49,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetCatalog()
         {            
+            // TODO: GetCatalog
             return Json(null);
         }
 
@@ -67,6 +69,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetClassOfferings(string subject, int number)
         {            
+            // TODO: GetClassOfferings
             return Json(null);
         }
 
@@ -83,7 +86,8 @@ namespace LMS.Controllers
         /// <param name="asgname">The name of the assignment in the category</param>
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
-        {            
+        {         
+            // TODO: GetAssignmentContents
             return Content("");
         }
 
@@ -104,6 +108,7 @@ namespace LMS.Controllers
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
         {            
+            // TODO: GetSubmissionText
             return Content("");
         }
 
@@ -126,6 +131,7 @@ namespace LMS.Controllers
         /// </returns>
         public IActionResult GetUser(string uid)
         {           
+            // TODO: GetUser
             return Json(new { success = false });
         }
 

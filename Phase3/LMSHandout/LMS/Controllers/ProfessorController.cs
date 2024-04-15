@@ -118,6 +118,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetStudentsInClass(string subject, int num, string season, int year)
         {
+            // TODO: GetStudentsInClass
             return Json(null);
         }
 
@@ -141,6 +142,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInCategory(string subject, int num, string season, int year, string category)
         {
+            // TODO: GetAssignmentsInCategory
             return Json(null);
         }
 
@@ -159,6 +161,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentCategories(string subject, int num, string season, int year)
         {
+            // TODO: GetAssignmentCategories
             return Json(null);
         }
 
@@ -175,6 +178,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing {success = true/false} </returns>
         public IActionResult CreateAssignmentCategory(string subject, int num, string season, int year, string category, int catweight)
         {
+            // TODO: CreateAssignmentCategory
             return Json(new { success = false });
         }
 
@@ -193,6 +197,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing success = true/false</returns>
         public IActionResult CreateAssignment(string subject, int num, string season, int year, string category, string asgname, int asgpoints, DateTime asgdue, string asgcontents)
         {
+            // TODO: CreateAssignment
             return Json(new { success = false });
         }
 
@@ -216,6 +221,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetSubmissionsToAssignment(string subject, int num, string season, int year, string category, string asgname)
         {
+            // TODO: GetSubmissionsToAssignment
             return Json(null);
         }
 
@@ -234,6 +240,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing success = true/false</returns>
         public IActionResult GradeSubmission(string subject, int num, string season, int year, string category, string asgname, string uid, int score)
         {
+            // TODO: GradeSubmission
             return Json(new { success = false });
         }
 
@@ -251,6 +258,7 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {            
+            // TODO: GetMyClasses
             return Json(null);
         }
 

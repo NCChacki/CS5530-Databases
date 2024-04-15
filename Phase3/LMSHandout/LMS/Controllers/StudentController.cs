@@ -76,6 +76,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {           
+            // TODO: GetMyClasses
             return Json(null);
         }
 
@@ -95,6 +96,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
         {            
+            // TODO: GetAssignmentsInClass
             return Json(null);
         }
 
@@ -120,6 +122,7 @@ namespace LMS.Controllers
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
         {           
+            // TODO: GetAssignmentText
             return Json(new { success = false });
         }
 
@@ -136,6 +139,7 @@ namespace LMS.Controllers
         /// false if the student is already enrolled in the class, true otherwise.</returns>
         public IActionResult Enroll(string subject, int num, string season, int year, string uid)
         {          
+            // TODO: Enroll
             return Json(new { success = false});
         }
 
@@ -154,6 +158,7 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing a single field called "gpa" with the number value</returns>
         public IActionResult GetGPA(string uid)
         {            
+            // TODO: GetGPA
             return Json(null);
         }
                 

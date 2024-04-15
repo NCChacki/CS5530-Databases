@@ -194,6 +194,8 @@ namespace LMS.Areas.Identity.Pages.Account
         /// <returns>The uID of the new user</returns>
         string CreateNewUser( string firstName, string lastName, DateTime DOB, string departmentAbbrev, string role )
         {
+            // (select max(uID) as x from Administrators) union (select max(uID) as x from Professors) union (select max(uID) as x from Students) order by x desc limit 1;
+            // TODO: CreateNewUser
             return "unknown";
         }
 

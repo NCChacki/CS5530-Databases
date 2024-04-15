@@ -50,7 +50,7 @@ namespace LMS.Controllers
         /// false if the department already exists, true otherwise.</returns>
         public IActionResult CreateDepartment(string subject, string name)
         {
-            
+            // TODO: CreateDepartment
             return Json(new { success = false});
         }
 
@@ -65,7 +65,7 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetCourses(string subject)
         {
-            
+            // TODO: GetCourses
             return Json(null);
         }
 
@@ -80,7 +80,7 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetProfessors(string subject)
         {
-            
+            // TODO: GetProfessors
             return Json(null);
             
         }
@@ -98,6 +98,7 @@ namespace LMS.Controllers
         /// false if the course already exists, true otherwise.</returns>
         public IActionResult CreateCourse(string subject, int number, string name)
         {           
+            // TODO: CreateCourse
             return Json(new { success = false });
         }
 
@@ -121,6 +122,7 @@ namespace LMS.Controllers
         /// true otherwise.</returns>
         public IActionResult CreateClass(string subject, int number, string season, int year, DateTime start, DateTime end, string location, string instructor)
         {            
+            // TODO: CreateClass
             return Json(new { success = false});
         }
 
