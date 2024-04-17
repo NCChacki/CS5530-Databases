@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -194,9 +195,83 @@ namespace LMS.Areas.Identity.Pages.Account
         /// <returns>The uID of the new user</returns>
         string CreateNewUser( string firstName, string lastName, DateTime DOB, string departmentAbbrev, string role )
         {
-            // (select max(uID) as x from Administrators) union (select max(uID) as x from Professors) union (select max(uID) as x from Students) order by x desc limit 1;
-            // TODO: CreateNewUser
-            return "unknown";
+            // Identify the current max uID value
+            var maxA = (from a in db.Administrators select a.UId).Max();
+            var maxP = (from p in db.Professors select p.UId).Max();
+            var maxS = (from s in db.Students select s.UId).Max();
+
+            int nextUId = 0;
+
+            if (maxA != null)
+            {
+                int aUId;
+                int.TryParse(maxA.Split('u')[1], out aUId);
+                nextUId = Math.Max(nextUId, aUId);
+            }
+
+            if (maxP != null)
+            {
+                int pUId;
+                int.TryParse(maxP.Split('u')[1], out pUId);
+                nextUId = Math.Max(nextUId, pUId);
+            }
+
+            if (maxS != null)
+            {
+                int sUId;
+                int.TryParse(maxS.Split('u')[1], out sUId);
+                nextUId = Math.Max(nextUId, sUId);
+            }
+
+            // Increment to be the next value
+            nextUId += 1;
+
+            string format = "0000000";
+            string result = "u" + nextUId.ToString(format);
+
+            // Based on the role, add the new data to that table
+            if (role == "Administrator")
+            {
+                Administrator a = new Administrator();
+                a.UId = result;
+                a.FirstName = firstName;
+                a.LastName = lastName;
+                a.Dob = DateOnly.FromDateTime(DOB);
+
+                db.Administrators.Add(a);
+            } 
+            else if (role == "Professor")
+            {
+                Professor p = new Professor();
+                p.UId = result;
+                p.FirstName = firstName;
+                p.LastName = lastName;
+                p.Dob = DateOnly.FromDateTime(DOB);
+                p.WorksIn = departmentAbbrev;
+
+                db.Professors.Add(p);
+            }
+            else if (role == "Student")
+            {
+                Student s = new Student();
+                s.UId = result;
+                s.FirstName = firstName;
+                s.LastName = lastName;
+                s.Dob = DateOnly.FromDateTime(DOB);
+                s.Major = departmentAbbrev;
+
+                db.Students.Add(s);
+            }
+
+            try
+            {
+                db.SaveChanges();
+                return result;
+            }
+            catch
+            {
+                return "unknown";
+            }
         }
 
         /*******End code to modify********/
