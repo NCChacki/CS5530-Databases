@@ -54,9 +54,22 @@ namespace LMS.Controllers
         /// </summary>
         /// <returns>The JSON array</returns>
         public IActionResult GetCatalog()
-        {            
-            // TODO: GetCatalog
-            return Json(null);
+        {
+            var query = from d in db.Departments
+                        select new
+                        {
+                            subject = d.Subject,
+                            dname = d.Name,
+                            courses = (from c in db.Courses
+                                       where c.Department == d.Name
+                                       select new
+                                       {
+                                           number = c.Number,
+                                           cname = c.Name
+                                       }).ToArray()
+                        };
+
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -74,9 +87,26 @@ namespace LMS.Controllers
         /// <param name="number">The course number, as in 5530</param>
         /// <returns>The JSON array</returns>
         public IActionResult GetClassOfferings(string subject, int number)
-        {            
-            // TODO: GetClassOfferings
-            return Json(null);
+        {
+            var query = from course in db.Courses
+                        where course.Department == subject &&
+                              course.Number == number
+                        join offering in db.Classes
+                        on course.CourseId equals offering.CourseId
+                        join prof in db.Professors
+                        on offering.TaughtBy equals prof.UId
+                        select new
+                        {
+                            season = offering.Season,
+                            year = offering.SemesterYear,
+                            location = offering.Location,
+                            start = offering.Start,
+                            end = offering.End,
+                            fname = prof.FirstName,
+                            lname = prof.LastName
+                        };
+
+            return Json(query.ToArray());
         }
 
         /// <summary>

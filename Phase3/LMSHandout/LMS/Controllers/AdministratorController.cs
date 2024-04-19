@@ -165,36 +165,62 @@ namespace LMS.Controllers
         public IActionResult CreateClass(string subject, int number, string season, int year, DateTime start, DateTime end, string location, string instructor)
         {
             // Get the courseID
-            var query = from course in db.Courses
+            var courseID_query = from course in db.Courses
                         where course.Department == subject &&
                               course.Number == number
                         select course.CourseId;
 
-            // TODO: CreateClass - check for conflicts before adding
+            TimeOnly startTime = TimeOnly.FromDateTime(start);
+            TimeOnly endTime = TimeOnly.FromDateTime(end);
+
+            // Same location during a given semester within start-end range 
+            var overlap_query = from x in db.Classes
+                                where x.Location == location &&
+                                      x.Season == season &&
+                                      x.SemesterYear == year &&
+                                      ((x.Start >= startTime && x.Start <= endTime) ||
+                                      (x.End >= startTime && x.End <= endTime))
+                                select x;
+
+            if (overlap_query.Count() > 0)
+            {
+                return Json(new { success = false });
+            }
+
+            // Course already offered
+            var repeat_query = from y in db.Classes
+                               where y.CourseId == courseID_query.First() &&
+                                     y.Season == season &&
+                                     y.SemesterYear == year
+                               select y;
+
+            if (repeat_query.Count() > 0)
+            {
+                return Json(new { success = false });
+            }
 
             //// Create the class
-            //Class c = new Class();
-            //c.CourseId = query.First();
-            //c.Season = season;
-            //c.SemesterYear = (uint) year;
-            //c.Start = TimeOnly.FromDateTime(start);
-            //c.End = TimeOnly.FromDateTime(end);
-            //c.Location = location;
-            //c.TaughtBy = instructor;
+            Class c = new Class();
+            c.CourseId = courseID_query.First();
+            c.Season = season;
+            c.SemesterYear = (uint)year;
+            c.Start = startTime;
+            c.End = endTime;
+            c.Location = location;
+            c.TaughtBy = instructor;
 
-            //db.Classes.Add(c);
+            db.Classes.Add(c);
 
-            //try
-            //{
-            //    db.SaveChanges();
-            //    return Json(new { success = true });
-            //}
-            //catch
-            //{
-            //    return Json(new { success = false });
-            //}
+            try
+            {
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
 
-            return Json(new { success = false });
         }
 
 
