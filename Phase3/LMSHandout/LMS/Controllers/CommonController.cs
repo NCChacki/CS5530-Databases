@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 [assembly: InternalsVisibleTo( "LMSControllerTests" )]
@@ -122,9 +123,22 @@ namespace LMS.Controllers
         /// <param name="asgname">The name of the assignment in the category</param>
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
-        {         
-            // TODO: GetAssignmentContents
-            return Content("");
+        {
+            var query = from class_ in db.Classes
+                        where class_.Season == season &&
+                              class_.SemesterYear == year &&
+                              class_.CourseId == num
+                        join catagory in db.AssignmentCategories
+                        on class_.ClassId equals catagory.ClassId
+                        where catagory.Name==category
+                        join assignment  in db.Assignments
+                        on catagory.CategoryId equals assignment.CategoryId
+                        where assignment.Name==asgname
+                        select new
+                        {
+                            contents = assignment.Contents
+                        };
+            return Content(query.ToString());
         }
 
 
@@ -143,9 +157,25 @@ namespace LMS.Controllers
         /// <param name="uid">The uid of the student who submitted it</param>
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
-        {            
-            // TODO: GetSubmissionText
-            return Content("");
+        {
+            var query = from class_ in db.Classes
+                        where class_.Season == season &&
+                              class_.SemesterYear == year &&
+                              class_.CourseId == num
+                        join catagory in db.AssignmentCategories
+                        on class_.ClassId equals catagory.ClassId
+                        where catagory.Name == category
+                        join assignment in db.Assignments
+                        on catagory.CategoryId equals assignment.CategoryId
+                        where assignment.Name == asgname
+                        join submission in db.Submissions
+                        on assignment.AssignmentId equals submission.AssignmentId
+                        where submission.Student == uid
+                        select new
+                        {
+                            submissionText = submission.Contents
+                        };
+            return Content(query.ToString());
         }
 
 
