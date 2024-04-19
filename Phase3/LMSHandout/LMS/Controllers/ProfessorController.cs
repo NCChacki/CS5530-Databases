@@ -161,8 +161,20 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentCategories(string subject, int num, string season, int year)
         {
-            // TODO: GetAssignmentCategories
-            return Json(null);
+            var query = from cat in db.AssignmentCategories
+                        join c in db.Classes on cat.ClassId equals c.ClassId
+                        where c.Season == season &&
+                              c.SemesterYear == year
+                        join course in db.Courses on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                              course.Number == num
+                        select new
+                        {
+                            name = cat.Name,
+                            weight = cat.Weight
+                        };
+
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -178,8 +190,30 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing {success = true/false} </returns>
         public IActionResult CreateAssignmentCategory(string subject, int num, string season, int year, string category, int catweight)
         {
-            // TODO: CreateAssignmentCategory
-            return Json(new { success = false });
+            var query = from course in db.Courses
+                        where course.Department == subject &&
+                              course.Number == num
+                        join c in db.Classes on course.CourseId equals c.CourseId
+                        where c.Season == season &&
+                              c.SemesterYear == year
+                        select c.ClassId;
+
+            AssignmentCategory cat = new AssignmentCategory();
+            cat.Name = category;
+            cat.Weight = (uint) catweight;
+            cat.ClassId = query.ToArray().First();
+
+            db.AssignmentCategories.Add(cat);
+
+            try
+            {
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
         }
 
         /// <summary>
@@ -257,9 +291,20 @@ namespace LMS_CustomIdentity.Controllers
         /// <param name="uid">The professor's uid</param>
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
-        {            
-            // TODO: GetMyClasses
-            return Json(null);
+        {
+            var query = from c in db.Classes
+                        where c.TaughtBy == uid
+                        join course in db.Courses on c.CourseId equals course.CourseId
+                        select new
+                        {
+                            subject = course.Department,
+                            number = course.Number,
+                            name = course.Name,
+                            season = c.Season,
+                            year = c.SemesterYear
+                        };
+
+            return Json(query.ToArray());
         }
 
 
