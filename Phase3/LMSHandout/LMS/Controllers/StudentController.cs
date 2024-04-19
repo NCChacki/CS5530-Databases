@@ -75,9 +75,22 @@ namespace LMS.Controllers
         /// <param name="uid">The uid of the student</param>
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
-        {           
-            // TODO: GetMyClasses
-            return Json(null);
+        {
+            var query = from enrolled in db.EnrollmentGrades
+                        where enrolled.Student == uid
+                        join c in db.Classes on enrolled.ClassId equals c.ClassId
+                        join course in db.Courses on c.CourseId equals course.CourseId
+                        select new
+                        {
+                            subject = course.Department,
+                            number = course.Number,
+                            name = course.Name,
+                            season = c.Season,
+                            year = c.SemesterYear,
+                            grade = enrolled.Grade
+                        };
+
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -138,9 +151,26 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing {success = {true/false}. 
         /// false if the student is already enrolled in the class, true otherwise.</returns>
         public IActionResult Enroll(string subject, int num, string season, int year, string uid)
-        {          
-            // TODO: Enroll
-            return Json(new { success = false});
+        {
+            EnrollmentGrade enrolled = new EnrollmentGrade();
+            enrolled.Student = uid;
+            enrolled.ClassId = (from c in db.Classes
+                                where c.Season == season && c.SemesterYear == year
+                                join course in db.Courses on c.CourseId equals course.CourseId
+                                where course.Department == subject && course.Number == num
+                                select c.ClassId).First();
+
+            db.EnrollmentGrades.Add(enrolled);
+
+            try
+            {
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
         }
 
 
