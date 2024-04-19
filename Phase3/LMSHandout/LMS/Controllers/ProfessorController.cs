@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
@@ -333,8 +334,29 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetSubmissionsToAssignment(string subject, int num, string season, int year, string category, string asgname)
         {
-            // TODO: GetSubmissionsToAssignment
-            return Json(null);
+           
+            var query = from class_ in db.Classes
+                        where class_.Season == season &&
+                              class_.SemesterYear == year &&
+                              class_.CourseId == num
+                        join catagory in db.AssignmentCategories
+                        on class_.ClassId equals catagory.ClassId
+                        where catagory.Name == category
+                        join assignment in db.Assignments
+                        on catagory.CategoryId equals assignment.CategoryId
+                        where assignment.Name == asgname
+                        join submission in db.Submissions
+                        on assignment.AssignmentId equals submission.AssignmentId
+                        select new
+                        {
+                            fname = submission.StudentNavigation.FirstName,
+                            lname = submission.StudentNavigation.LastName,
+                            uid = submission.StudentNavigation.UId,
+                            time= submission.SubmissionDate,
+                            score= submission.Score
+                        };
+
+            return Json(query.ToArray());
         }
 
 
@@ -352,8 +374,34 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing success = true/false</returns>
         public IActionResult GradeSubmission(string subject, int num, string season, int year, string category, string asgname, string uid, int score)
         {
-            // TODO: GradeSubmission
-            return Json(new { success = false });
+           
+
+            var query= from submission in db.Submissions
+                       where submission.StudentNavigation.UId== uid &&
+                       submission.Assignment.Name == asgname &&
+                       submission.Assignment.Category.Name == category &&
+                       submission.Assignment.Category.Class.Season == season &&
+                       submission.Assignment.Category.Class.SemesterYear == year &&
+                       submission.Assignment.Category.Class.Course.DepartmentNavigation.Subject == subject &&
+                       submission.Assignment.Category.Class.Course.Number == num
+                       select submission;
+
+
+            foreach (Submission submission in query)
+            {
+                submission.Score = (uint)score;
+            }
+
+            try
+            {
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false });
+            }
+           
         }
 
 

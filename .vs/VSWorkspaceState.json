@@ -1,7 +1,15 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\HW7\\LibraryWebServer",
+    "\\Phase3",
+    "\\Phase3\\LMSHandout",
+    "\\Phase3\\LMSHandout\\LMS",
+    "\\Phase3\\LMSHandout\\LMSControllerTests",
+    "\\Phase3\\LMSHandout\\LMS\\Controllers",
+    "\\Phase3\\LMSHandout\\LMS\\Models",
+    "\\Phase3\\LMSHandout\\LMS\\Models\\LMSModels"
   ],
-  "SelectedNode": "\\C:\\Users\\Norman Canning\\OneDrive - University of Utah\\Soph Spring\\data\\phase 3",
+  "SelectedNode": "\\Phase3\\LMSHandout\\LMS.sln",
   "PreviewInSolutionExplorer": false
 }

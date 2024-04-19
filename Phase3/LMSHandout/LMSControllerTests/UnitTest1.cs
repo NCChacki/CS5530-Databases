@@ -24,8 +24,8 @@ namespace LMSControllerTests
 
         //    dynamic x = allDepts.Value;
 
-        //    Assert.Equal( 1, x.Length );
-        //    Assert.Equal( "CS", x[0].subject );
+        //    Assert.Equal(1, x.Length);
+        //    Assert.Equal("CS", x[0].subject);
         //}
 
 
@@ -37,9 +37,9 @@ namespace LMSControllerTests
         //LMSContext MakeTinyDB()
         //{
         //    var contextOptions = new DbContextOptionsBuilder<LMSContext>()
-        //    .UseInMemoryDatabase( "LMSControllerTest" )
-        //    .ConfigureWarnings( b => b.Ignore( InMemoryEventId.TransactionIgnoredWarning ) )
-        //    .UseApplicationServiceProvider( NewServiceProvider() )
+        //    .UseInMemoryDatabase("LMSControllerTest")
+        //    .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+        //    .UseApplicationServiceProvider(NewServiceProvider())
         //    .Options;
 
         //    var db = new LMSContext(contextOptions);
@@ -47,7 +47,7 @@ namespace LMSControllerTests
         //    db.Database.EnsureDeleted();
         //    db.Database.EnsureCreated();
 
-        //    db.Departments.Add( new Department { Name = "KSoC", Subject = "CS" } );
+        //    db.Departments.Add(new Department { Name = "KSoC", Subject = "CS" });
 
         //    // TODO: add more objects to the test database
 
