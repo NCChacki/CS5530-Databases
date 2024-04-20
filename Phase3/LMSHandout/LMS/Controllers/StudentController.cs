@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using static System.Formats.Asn1.AsnWriter;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -263,9 +264,88 @@ namespace LMS.Controllers
         /// <param name="uid">The uid of the student</param>
         /// <returns>A JSON object containing a single field called "gpa" with the number value</returns>
         public IActionResult GetGPA(string uid)
-        {            
-            // TODO: GetGPA
-            return Json(null);
+        {
+
+
+            var query = from e in db.EnrollmentGrades
+                        join s in db.Students
+                        on e.StudentNavigation.UId equals s.UId
+                        where s.UId == uid
+                        select e;
+
+
+
+
+            if (query.Count() == 0) 
+            {
+                return Json(new { gpa = 0.0 });
+            }
+            else
+            {
+                double sumOfGrades = 0.0;
+                int numberOfNoGrades = 0;
+                foreach (EnrollmentGrade e in query)
+                {
+                    if(e.Grade=="A")
+                    {
+                        sumOfGrades = +4;
+                    }
+                    else if(e.Grade == "A-")
+                    {
+                        sumOfGrades =+3.7;
+                    }
+                    else if (e.Grade == "B+")
+                    {
+                        sumOfGrades = +3.3;
+                    }
+                    else if (e.Grade == "B")
+                    {
+                        sumOfGrades = +3;
+                    }
+                    else if (e.Grade == "B-")
+                    {
+                        sumOfGrades = +2.7;
+                    }
+                    else if (e.Grade == "C+")
+                    {
+                        sumOfGrades = +2.3;
+                    }
+                    else if (e.Grade == "C")
+                    {
+                        sumOfGrades = +2;
+                    }
+                    else if (e.Grade == "C-")
+                    {
+                        sumOfGrades = +1.7;
+                    }
+                    else if (e.Grade == "D+")
+                    {
+                        sumOfGrades = +1.3;
+                    }
+                    else if (e.Grade == "D")
+                    {
+                        sumOfGrades = +1;
+                    }
+                    else if (e.Grade == "D-")
+                    {
+                        sumOfGrades = +0.7;
+                    }
+                    else if(e.Grade =="E")
+                    {
+                        sumOfGrades = +0.0;
+                    }
+                    else
+                    {
+                        numberOfNoGrades++;
+                    }
+
+                }
+
+                double returnGPA = sumOfGrades/(query.Count()-numberOfNoGrades);
+                return Json(new { gpa = returnGPA });
+            }
+            
+           
         }
                 
         /*******End code to modify********/
