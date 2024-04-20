@@ -5,9 +5,11 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Formats.Asn1.AsnWriter;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -334,27 +336,32 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetSubmissionsToAssignment(string subject, int num, string season, int year, string category, string asgname)
         {
-           
-            var query = from class_ in db.Classes
-                        where class_.Season == season &&
-                              class_.SemesterYear == year &&
-                              class_.CourseId == num
-                        join catagory in db.AssignmentCategories
-                        on class_.ClassId equals catagory.ClassId
-                        where catagory.Name == category
-                        join assignment in db.Assignments
-                        on catagory.CategoryId equals assignment.CategoryId
-                        where assignment.Name == asgname
+
+            var query = from assignment in db.Assignments
+                        join cat in db.AssignmentCategories
+                            on assignment.CategoryId equals cat.CategoryId
+                        where cat.Name == category && assignment.Name == asgname
+                        join c in db.Classes
+                            on cat.ClassId equals c.ClassId
+                        where c.SemesterYear == year &&
+                                c.Season == season
+                        join course in db.Courses
+                            on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                                course.Number == num
                         join submission in db.Submissions
-                        on assignment.AssignmentId equals submission.AssignmentId
+                           on assignment.AssignmentId equals submission.AssignmentId
+                        join student in db.Students
+                           on submission.Student equals student.UId
                         select new
                         {
-                            fname = submission.StudentNavigation.FirstName,
-                            lname = submission.StudentNavigation.LastName,
-                            uid = submission.StudentNavigation.UId,
+                            fname= student.FirstName,
+                            lname= student.LastName,
+                            uid = student.UId,
                             time= submission.SubmissionDate,
                             score= submission.Score
                         };
+
 
             return Json(query.ToArray());
         }
@@ -374,17 +381,25 @@ namespace LMS_CustomIdentity.Controllers
         /// <returns>A JSON object containing success = true/false</returns>
         public IActionResult GradeSubmission(string subject, int num, string season, int year, string category, string asgname, string uid, int score)
         {
-           
 
-            var query= from submission in db.Submissions
-                       where submission.StudentNavigation.UId== uid &&
-                       submission.Assignment.Name == asgname &&
-                       submission.Assignment.Category.Name == category &&
-                       submission.Assignment.Category.Class.Season == season &&
-                       submission.Assignment.Category.Class.SemesterYear == year &&
-                       submission.Assignment.Category.Class.Course.DepartmentNavigation.Subject == subject &&
-                       submission.Assignment.Category.Class.Course.Number == num
-                       select submission;
+
+            var query = from assignment in db.Assignments
+                        join cat in db.AssignmentCategories
+                            on assignment.CategoryId equals cat.CategoryId
+                        where cat.Name == category && assignment.Name == asgname
+                        join c in db.Classes
+                            on cat.ClassId equals c.ClassId
+                        where c.SemesterYear == year &&
+                                c.Season == season
+                        join course in db.Courses
+                            on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                                course.Number == num
+                        join submission in db.Submissions
+                           on assignment.AssignmentId equals submission.AssignmentId
+                        join student in db.Students
+                           on submission.Student equals student.UId
+                        select submission;
 
 
             foreach (Submission submission in query)
