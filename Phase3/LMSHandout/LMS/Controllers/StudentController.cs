@@ -282,51 +282,51 @@ namespace LMS.Controllers
                 {
                     if(e.Grade=="A")
                     {
-                        sumOfGrades = +4;
+                        sumOfGrades += 4;
                     }
                     else if(e.Grade == "A-")
                     {
-                        sumOfGrades =+3.7;
+                        sumOfGrades += 3.7;
                     }
                     else if (e.Grade == "B+")
                     {
-                        sumOfGrades = +3.3;
+                        sumOfGrades += 3.3;
                     }
                     else if (e.Grade == "B")
                     {
-                        sumOfGrades = +3;
+                        sumOfGrades += 3;
                     }
                     else if (e.Grade == "B-")
                     {
-                        sumOfGrades = +2.7;
+                        sumOfGrades += 2.7;
                     }
                     else if (e.Grade == "C+")
                     {
-                        sumOfGrades = +2.3;
+                        sumOfGrades += 2.3;
                     }
                     else if (e.Grade == "C")
                     {
-                        sumOfGrades = +2;
+                        sumOfGrades += 2;
                     }
                     else if (e.Grade == "C-")
                     {
-                        sumOfGrades = +1.7;
+                        sumOfGrades += 1.7;
                     }
                     else if (e.Grade == "D+")
                     {
-                        sumOfGrades = +1.3;
+                        sumOfGrades += 1.3;
                     }
                     else if (e.Grade == "D")
                     {
-                        sumOfGrades = +1;
+                        sumOfGrades += 1;
                     }
                     else if (e.Grade == "D-")
                     {
-                        sumOfGrades = +0.7;
+                        sumOfGrades += 0.7;
                     }
                     else if(e.Grade =="E")
                     {
-                        sumOfGrades = +0.0;
+                        sumOfGrades += 0.0;
                     }
                     else
                     {
@@ -335,7 +335,13 @@ namespace LMS.Controllers
 
                 }
 
-                double returnGPA = sumOfGrades/(query.Count()-numberOfNoGrades);
+                double denom = query.Count() - numberOfNoGrades;
+                double returnGPA = 0.0;
+                if (denom > 0)
+                {
+                    returnGPA = sumOfGrades / denom;
+                }
+                
                 return Json(new { gpa = returnGPA });
             }
             
