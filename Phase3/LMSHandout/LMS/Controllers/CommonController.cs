@@ -62,7 +62,7 @@ namespace LMS.Controllers
                             subject = d.Subject,
                             dname = d.Name,
                             courses = (from c in db.Courses
-                                       where c.Department == d.Name
+                                       where c.DepartmentNavigation.Name == d.Name
                                        select new
                                        {
                                            number = c.Number,
