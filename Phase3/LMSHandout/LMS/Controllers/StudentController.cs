@@ -112,30 +112,39 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
         {
-            var query = from submission in db.Submissions
-                        join assignment in db.Assignments
-                        on submission.AssignmentId equals assignment.AssignmentId
-                        join catgorie in db.AssignmentCategories
-                        on assignment.CategoryId equals catgorie.CategoryId
-                        join class_ in db.Classes
-                        on catgorie.ClassId equals class_.ClassId
-                        where class_.Season == season &&
-                        class_.SemesterYear == year &&
-                        class_.Course.Number == num &&
-                        class_.Course.DepartmentNavigation.Subject == subject
-                        join enroll in db.EnrollmentGrades
-                        on class_.ClassId equals enroll.ClassId
-                        where enroll.StudentNavigation.UId == uid
+            var query = from assignment in db.Assignments
+                        join cat in db.AssignmentCategories
+                            on assignment.CategoryId equals cat.CategoryId
+                        join c in db.Classes
+                            on cat.ClassId equals c.ClassId
+                        where c.SemesterYear == year &&
+                                c.Season == season
+                        join course in db.Courses
+                            on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                                course.Number == num
                         select new
                         {
-                            aname= assignment.Name,
-                            cname= catgorie.Name,
-                            due= assignment.Due,
-                            score= submission.Score
+                            AssignmentId = assignment.AssignmentId,
+                            aname = assignment.Name,
+                            cname = cat.Name,
+                            due = assignment.Due
                         };
 
+            var scores = from q in query
+                         join s in db.Submissions
+                            on new { A = q.AssignmentId, B = uid } equals new { A = s.AssignmentId, B = s.Student }
+                         into joined
+                         from j in joined.DefaultIfEmpty()
+                         select new
+                         {
+                             aname = q.aname,
+                             cname = q.cname,
+                             due = q.due,
+                             score = j != null ? j.Score : 0
+                         };
 
-            return Json(query.ToArray());
+            return Json(scores.ToArray());
         }
 
 
