@@ -22,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -31,6 +31,10 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Bookmark",
@@ -59,8 +63,7 @@
               "RelativeToolTip": "Phase3\\LMSHandout\\LMS\\Program.cs",
               "ViewState": "AQIAAAYAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-19T20:34:15.52Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-19T20:34:15.52Z"
             },
             {
               "$type": "Document",
@@ -72,8 +75,7 @@
               "RelativeToolTip": "Phase3\\LMSHandout\\LMSControllerTests\\UnitTest1.cs",
               "ViewState": "AQIAACQAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-19T20:31:59.361Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-04-19T20:31:59.361Z"
             }
           ]
         }

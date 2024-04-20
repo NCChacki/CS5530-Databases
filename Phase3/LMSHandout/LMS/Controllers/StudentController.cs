@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Formats.Asn1.AsnWriter;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 [assembly: InternalsVisibleTo( "LMSControllerTests" )]
@@ -108,9 +110,34 @@ namespace LMS.Controllers
         /// <param name="uid"></param>
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
-        {            
-            // TODO: GetAssignmentsInClass
-            return Json(null);
+        {
+
+           
+
+            var query = from submission in db.Submissions
+                        join assignment in db.Assignments
+                        on submission.AssignmentId equals assignment.AssignmentId
+                        join catgorie in db.AssignmentCategories
+                        on assignment.CategoryId equals catgorie.CategoryId
+                        join class_ in db.Classes
+                        on catgorie.ClassId equals class_.ClassId
+                        where class_.Season == season &&
+                        class_.SemesterYear == year &&
+                        class_.Course.Number == num &&
+                        class_.Course.DepartmentNavigation.Subject == subject
+                        join enroll in db.EnrollmentGrades
+                        on class_.ClassId equals enroll.ClassId
+                        where enroll.StudentNavigation.UId == uid
+                        select new
+                        {
+                            aname= assignment.Name,
+                            cname= catgorie.Name,
+                            due= assignment.Due,
+                            score= submission.Score
+                        };
+
+
+            return Json(query.ToArray());
         }
 
 
@@ -134,9 +161,58 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing {success = true/false}</returns>
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
-        {           
-            // TODO: GetAssignmentText
-            return Json(new { success = false });
+        {
+
+
+            var query = from submission in db.Submissions
+                         join assignment in db.Assignments
+                         on submission.AssignmentId equals assignment.AssignmentId
+                         where assignment.Name == asgname
+                         join catgorie in db.AssignmentCategories
+                         on assignment.CategoryId equals catgorie.CategoryId
+                         join class_ in db.Classes
+                         on catgorie.ClassId equals class_.ClassId
+                         where class_.Season == season &&
+                         class_.SemesterYear == year &&
+                         class_.Course.Number == num &&
+                         class_.Course.DepartmentNavigation.Subject == subject
+                         join enroll in db.EnrollmentGrades
+                         on class_.ClassId equals enroll.ClassId
+                         where enroll.StudentNavigation.UId == uid
+                         select submission;
+
+            if(query.Count() > 0) 
+            {
+                foreach (Submission submission in query)
+                {
+                    submission.Contents = contents;
+                    submission.SubmissionDate = DateTime.Now;
+                }
+
+            }
+            else
+            {
+                Submission submission = new Submission();
+                submission.SubmissionDate= DateTime.Now;
+                submission.Contents= contents;
+                submission.Score = 0;
+
+                db.Submissions.Add(submission);
+            }
+
+
+            try
+            {
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false });
+            }
+
+
+
         }
 
 
