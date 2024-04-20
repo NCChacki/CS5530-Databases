@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -154,24 +155,37 @@ namespace LMS.Controllers
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
         {
-            var query = from class_ in db.Classes
-                        where class_.Season == season &&
-                              class_.SemesterYear == year &&
-                              class_.CourseId == num
-                        join catagory in db.AssignmentCategories
-                        on class_.ClassId equals catagory.ClassId
-                        where catagory.Name == category
-                        join assignment in db.Assignments
-                        on catagory.CategoryId equals assignment.CategoryId
-                        where assignment.Name == asgname
+            var query = from assignment in db.Assignments
+                        join cat in db.AssignmentCategories
+                            on assignment.CategoryId equals cat.CategoryId
+                        where cat.Name == category && assignment.Name == asgname
+                        join c in db.Classes
+                            on cat.ClassId equals c.ClassId
+                        where c.SemesterYear == year &&
+                                c.Season == season
+                        join course in db.Courses
+                            on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                                course.Number == num
                         join submission in db.Submissions
-                        on assignment.AssignmentId equals submission.AssignmentId
-                        where submission.Student == uid
-                        select new
-                        {
-                            submissionText = submission.Contents
-                        };
-            return Content(query.ToString());
+                           on new { A = assignment.AssignmentId, B = uid } equals new { A = submission.AssignmentId, B = submission.Student }
+                        select submission;
+
+            if (query.Count() > 0)
+            {
+                foreach (Submission s in query)
+                {
+                    return Content(s.Contents);
+                }
+
+            }
+            
+            
+           return Content("");
+
+            
+
+            
         }
 
 

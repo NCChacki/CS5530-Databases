@@ -169,31 +169,34 @@ namespace LMS.Controllers
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
         {
-            var query = from submission in db.Submissions
-                         join assignment in db.Assignments
-                         on submission.AssignmentId equals assignment.AssignmentId
-                         where assignment.Name == asgname
-                         join catgorie in db.AssignmentCategories
-                         on assignment.CategoryId equals catgorie.CategoryId
-                         join class_ in db.Classes
-                         on catgorie.ClassId equals class_.ClassId
-                         where class_.Season == season &&
-                         class_.SemesterYear == year &&
-                         class_.Course.Number == num &&
-                         class_.Course.DepartmentNavigation.Subject == subject
-                         join enroll in db.EnrollmentGrades
-                         on class_.ClassId equals enroll.ClassId
-                         where enroll.StudentNavigation.UId == uid
-                         select submission;
+           
 
-            if(query.Count() > 0) 
+            var query = from assignment in db.Assignments
+                        join cat in db.AssignmentCategories
+                            on assignment.CategoryId equals cat.CategoryId
+                        where cat.Name == category && assignment.Name == asgname
+                        join c in db.Classes
+                            on cat.ClassId equals c.ClassId
+                        where c.SemesterYear == year &&
+                                c.Season == season
+                        join course in db.Courses
+                            on c.CourseId equals course.CourseId
+                        where course.Department == subject &&
+                                course.Number == num
+                        join submission in db.Submissions
+                           on new { A = assignment.AssignmentId, B = uid } equals new { A = submission.AssignmentId, B = submission.Student }
+                        select submission;
+
+
+
+            if (query.Count() > 0) 
             {
-                foreach (Submission submission in query)
+                foreach(Submission s in query)
                 {
-                    submission.Contents = contents;
-                    submission.SubmissionDate = DateTime.Now;
+                    s.Contents = contents;
+                    s.SubmissionDate = DateTime.Now;
                 }
-
+                    
             }
             else
             {
@@ -201,6 +204,20 @@ namespace LMS.Controllers
                 submission.SubmissionDate= DateTime.Now;
                 submission.Contents= contents;
                 submission.Score = 0;
+                submission.Student = uid;
+                submission.AssignmentId = (from assignment in db.Assignments
+                                        join cat in db.AssignmentCategories
+                                            on assignment.CategoryId equals cat.CategoryId
+                                        where cat.Name == category && assignment.Name == asgname
+                                        join c in db.Classes
+                                            on cat.ClassId equals c.ClassId
+                                        where c.SemesterYear == year &&
+                                                c.Season == season
+                                        join course in db.Courses
+                                            on c.CourseId equals course.CourseId
+                                        where course.Department == subject &&
+                                                course.Number == num
+                                        select assignment.AssignmentId).First();
 
                 db.Submissions.Add(submission);
             }
