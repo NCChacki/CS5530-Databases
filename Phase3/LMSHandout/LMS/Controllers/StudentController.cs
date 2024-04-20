@@ -112,9 +112,6 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
         {
-
-           
-
             var query = from submission in db.Submissions
                         join assignment in db.Assignments
                         on submission.AssignmentId equals assignment.AssignmentId
@@ -163,8 +160,6 @@ namespace LMS.Controllers
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
         {
-
-
             var query = from submission in db.Submissions
                          join assignment in db.Assignments
                          on submission.AssignmentId equals assignment.AssignmentId
@@ -230,6 +225,7 @@ namespace LMS.Controllers
         public IActionResult Enroll(string subject, int num, string season, int year, string uid)
         {
             EnrollmentGrade enrolled = new EnrollmentGrade();
+            enrolled.Grade = "--";
             enrolled.Student = uid;
             enrolled.ClassId = (from c in db.Classes
                                 where c.Season == season && c.SemesterYear == year
@@ -265,8 +261,6 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing a single field called "gpa" with the number value</returns>
         public IActionResult GetGPA(string uid)
         {
-
-
             var query = from e in db.EnrollmentGrades
                         join s in db.Students
                         on e.StudentNavigation.UId equals s.UId
