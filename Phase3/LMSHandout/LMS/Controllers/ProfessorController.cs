@@ -175,11 +175,11 @@ namespace LMS_CustomIdentity.Controllers
                                 aname = assign.Name,
                                 cname = cat.Name,
                                 due = assign.Due,
-                                submissions = assign.Submissions
+                                submissions = assign.Submissions.Count()
                             };
 
                 return Json(query.ToArray());
-            } 
+            }
             else
             {
                 var query = from assign in db.Assignments
@@ -196,7 +196,7 @@ namespace LMS_CustomIdentity.Controllers
                                 aname = assign.Name,
                                 cname = cat.Name,
                                 due = assign.Due,
-                                submissions = assign.Submissions
+                                submissions = assign.Submissions.Count()
                             };
 
                 return Json(query.ToArray());
@@ -307,6 +307,26 @@ namespace LMS_CustomIdentity.Controllers
 
             try
             {
+                var query = from course in db.Courses
+                            join class_ in db.Classes
+                            on course.CourseId equals class_.CourseId
+                            where class_.Season == season &&
+                                       class_.SemesterYear == year &&
+                                       course.Department == subject &&
+                                       course.Number == num
+                            join enroll in db.EnrollmentGrades
+                            on class_.ClassId equals enroll.ClassId
+                            join student in db.Students
+                            on enroll.StudentNavigation.UId equals student.UId
+                            select student;
+
+
+
+                foreach (Student student in query.ToArray())
+                {
+                    calculateStudentGrade(student.UId);
+                }
+
                 db.SaveChanges();
                 return Json(new { success = true });
             }
@@ -355,11 +375,11 @@ namespace LMS_CustomIdentity.Controllers
                            on submission.Student equals student.UId
                         select new
                         {
-                            fname= student.FirstName,
-                            lname= student.LastName,
+                            fname = student.FirstName,
+                            lname = student.LastName,
                             uid = student.UId,
-                            time= submission.SubmissionDate,
-                            score= submission.Score
+                            time = submission.SubmissionDate,
+                            score = submission.Score
                         };
 
 
@@ -399,6 +419,7 @@ namespace LMS_CustomIdentity.Controllers
                            on assignment.AssignmentId equals submission.AssignmentId
                         join student in db.Students
                            on submission.Student equals student.UId
+                        where student.UId == uid
                         select submission;
 
 
@@ -410,13 +431,16 @@ namespace LMS_CustomIdentity.Controllers
             try
             {
                 db.SaveChanges();
+
+                calculateStudentGrade(uid);
+
                 return Json(new { success = true });
             }
             catch (Exception e)
             {
                 return Json(new { success = false });
             }
-           
+
         }
 
 
@@ -448,8 +472,169 @@ namespace LMS_CustomIdentity.Controllers
             return Json(query.ToArray());
         }
 
+        public void calculateStudentGrade(string sId)
+        {
 
-        
+            var query = from s in db.Students
+                        join enroll in db.EnrollmentGrades
+                        on s.UId equals enroll.StudentNavigation.UId
+                        where s.UId == sId
+                        select enroll.ClassId;
+
+
+
+
+            foreach (uint classID in query.ToArray())
+            {
+                var query2 = from ac in db.AssignmentCategories
+                             join c in db.Classes
+                             on ac.ClassId equals c.ClassId
+                             where ac.ClassId == classID
+                             select ac;
+
+                double totalScaled = 0;
+                double catagoryWeights = 0;
+                double maxPoints = 0;
+                double earnedPoints = 0;
+
+
+
+                foreach (AssignmentCategory catagory in query2.ToArray())
+                {
+
+                    maxPoints = 0;
+                    earnedPoints = 0;
+
+                    var query3 = from a in db.Assignments
+                                 join ac in db.AssignmentCategories
+                                 on a.CategoryId equals ac.CategoryId
+                                 where ac.CategoryId == catagory.CategoryId
+                                 select a;
+
+                    if (query3.ToArray().Length == 0)
+                    {
+                        continue;
+                    }
+                    catagoryWeights += catagory.Weight;
+
+                    foreach (Assignment assignment in query3.ToArray())
+                    {
+                        var query4 = from s in db.Submissions
+                                     join a in db.Assignments
+                                     on s.AssignmentId equals a.AssignmentId
+                                     where a.AssignmentId == assignment.AssignmentId
+                                     select s;
+                        if (query4.ToArray().Length == 0)
+                        {
+                            maxPoints += assignment.Points;
+                            earnedPoints += 0;
+                            continue;
+                        }
+
+                        foreach (Submission submission in query4.ToArray())
+                        {
+                            if (submission.Student == sId)
+                            {
+                                maxPoints += assignment.Points;
+                                earnedPoints += submission.Score;
+                            }
+
+                        }
+
+                    }
+                    double scale = (earnedPoints / maxPoints);
+
+                    if (double.IsNaN(scale))
+                    {
+                        totalScaled += 0;
+                        continue;
+                    }
+
+                    totalScaled += (earnedPoints / maxPoints) * catagory.Weight;
+
+                }
+
+                var queryx = from s in db.Students
+                             join e in db.EnrollmentGrades
+                             on s.UId equals e.StudentNavigation.UId
+                             where s.UId == sId
+                             join classs_ in db.Classes
+                             on e.ClassId equals classs_.ClassId
+                             where classs_.ClassId == classID
+                             select e;
+
+                foreach (EnrollmentGrade e in queryx.ToArray())
+                {
+                    double scaling_factor = 100 / catagoryWeights;
+
+                    double grade = scaling_factor * totalScaled;
+                    e.Grade = convertToString(grade);
+                }
+
+            }
+
+
+            db.SaveChanges();
+
+        }
+
+        public string convertToString(double percentScore)
+        {
+
+            if (percentScore < 60)
+            {
+                return "E";
+            }
+            if (percentScore >= 60 && percentScore < 63)
+            {
+                return "D-";
+            }
+            if (percentScore >= 63 && percentScore < 67)
+            {
+                return "D";
+            }
+            if (percentScore >= 67 && percentScore < 70)
+            {
+                return "D+";
+            }
+            if (percentScore >= 70 && percentScore < 73)
+            {
+                return "C-";
+            }
+            if (percentScore >= 73 && percentScore < 77)
+            {
+                return "C";
+            }
+            if (percentScore >= 77 && percentScore < 80)
+            {
+                return "C+";
+            }
+            if (percentScore >= 80 && percentScore < 83)
+            {
+                return "B-";
+            }
+            if (percentScore >= 83 && percentScore < 87)
+            {
+                return "B";
+            }
+            if (percentScore >= 87 && percentScore < 90)
+            {
+                return "B+";
+            }
+            if (percentScore >= 90 && percentScore < 93)
+            {
+                return "A-";
+            }
+            if (percentScore >= 93 && percentScore <= 100)
+            {
+                return "A";
+            }
+
+            return "--";
+
+
+        }
+
         /*******End code to modify********/
     }
 }

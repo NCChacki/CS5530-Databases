@@ -38,7 +38,7 @@ namespace LMS.Controllers
                             name = d.Name,
                             subject = d.Subject
                         };
-                        
+
             return Json(query.ToArray());
         }
 
@@ -179,13 +179,13 @@ namespace LMS.Controllers
                 }
 
             }
-            
-            
-           return Content("");
 
-            
 
-            
+            return Content("");
+
+
+
+
         }
 
 
@@ -216,7 +216,7 @@ namespace LMS.Controllers
                             uid = a.UId
                         };
 
-            if (admin.Count() > 0) 
+            if (admin.Count() > 0)
             {
                 return Json(admin.ToArray().First());
             }
@@ -234,7 +234,7 @@ namespace LMS.Controllers
                                              select d.Name).First()
                            };
 
-                if(prof.Count() > 0)
+                if (prof.Count() > 0)
                 {
                     return Json(prof.ToArray().First());
                 }
@@ -252,7 +252,7 @@ namespace LMS.Controllers
                                                     select d.Name).First()
                                   };
 
-                    if(student.Count() > 0)
+                    if (student.Count() > 0)
                     {
                         return Json(student.ToArray().First());
                     }

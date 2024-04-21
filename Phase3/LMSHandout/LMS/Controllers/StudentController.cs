@@ -169,7 +169,7 @@ namespace LMS.Controllers
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
         {
-           
+
 
             var query = from assignment in db.Assignments
                         join cat in db.AssignmentCategories
@@ -189,35 +189,35 @@ namespace LMS.Controllers
 
 
 
-            if (query.Count() > 0) 
+            if (query.Count() > 0)
             {
-                foreach(Submission s in query)
+                foreach (Submission s in query)
                 {
                     s.Contents = contents;
                     s.SubmissionDate = DateTime.Now;
                 }
-                    
+
             }
             else
             {
                 Submission submission = new Submission();
-                submission.SubmissionDate= DateTime.Now;
-                submission.Contents= contents;
+                submission.SubmissionDate = DateTime.Now;
+                submission.Contents = contents;
                 submission.Score = 0;
                 submission.Student = uid;
                 submission.AssignmentId = (from assignment in db.Assignments
-                                        join cat in db.AssignmentCategories
-                                            on assignment.CategoryId equals cat.CategoryId
-                                        where cat.Name == category && assignment.Name == asgname
-                                        join c in db.Classes
-                                            on cat.ClassId equals c.ClassId
-                                        where c.SemesterYear == year &&
-                                                c.Season == season
-                                        join course in db.Courses
-                                            on c.CourseId equals course.CourseId
-                                        where course.Department == subject &&
-                                                course.Number == num
-                                        select assignment.AssignmentId).First();
+                                           join cat in db.AssignmentCategories
+                                               on assignment.CategoryId equals cat.CategoryId
+                                           where cat.Name == category && assignment.Name == asgname
+                                           join c in db.Classes
+                                               on cat.ClassId equals c.ClassId
+                                           where c.SemesterYear == year &&
+                                                   c.Season == season
+                                           join course in db.Courses
+                                               on c.CourseId equals course.CourseId
+                                           where course.Department == subject &&
+                                                   course.Number == num
+                                           select assignment.AssignmentId).First();
 
                 db.Submissions.Add(submission);
             }
@@ -296,7 +296,7 @@ namespace LMS.Controllers
 
 
 
-            if (query.Count() == 0) 
+            if (query.Count() == 0)
             {
                 return Json(new { gpa = 0.0 });
             }
@@ -306,11 +306,11 @@ namespace LMS.Controllers
                 int numberOfNoGrades = 0;
                 foreach (EnrollmentGrade e in query)
                 {
-                    if(e.Grade=="A")
+                    if (e.Grade == "A")
                     {
                         sumOfGrades += 4;
                     }
-                    else if(e.Grade == "A-")
+                    else if (e.Grade == "A-")
                     {
                         sumOfGrades += 3.7;
                     }
@@ -350,7 +350,7 @@ namespace LMS.Controllers
                     {
                         sumOfGrades += 0.7;
                     }
-                    else if(e.Grade =="E")
+                    else if (e.Grade == "E")
                     {
                         sumOfGrades += 0.0;
                     }
@@ -367,13 +367,11 @@ namespace LMS.Controllers
                 {
                     returnGPA = sumOfGrades / denom;
                 }
-                
+
                 return Json(new { gpa = returnGPA });
             }
-            
-           
         }
-                
+
         /*******End code to modify********/
 
     }
